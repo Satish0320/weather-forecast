@@ -12,24 +12,34 @@ export default function WeatherPage() {
     if (session) {
       fetch('/api/preferences')
         .then(async (res) => {
-          if (!res.ok) throw new Error('Failed to fetch preferences');
+          // console.log('Preferences API Response:', res);
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to fetch preferences');
+          }
           return res.json();
         })
-        .then((data) => setFavoriteCities(data.preferences?.favoriteCities || []))
+        .then((data) => {
+          // console.log('Preferences Data:', data);
+          setFavoriteCities(data.preferences?.favoriteCities || []);
+        })
         .catch((error) => console.error('Error fetching preferences:', error));
     }
   }, [session]);
+  
 
   const fetchWeather = async () => {
     try {
       const res = await fetch(`/api/weather?city=${city}`);
-      if (!res.ok) throw new Error('Weather API request failed');
       const data = await res.json();
+      // console.log('Weather API Response:', data);
+      if (!res.ok) throw new Error(data.message || 'Weather API request failed');
       setWeather(data);
     } catch (error) {
       console.error('Error fetching weather:', error);
     }
   };
+  
 
   const savePreferences = async () => {
     await fetch('/api/preferences', {
@@ -39,6 +49,7 @@ export default function WeatherPage() {
     });
     setFavoriteCities([...favoriteCities, city]);
   };
+
 
   return (
     <div className="p-4">
@@ -57,8 +68,8 @@ export default function WeatherPage() {
       {weather && (
         <div className="mt-4">
           <h2 className="text-xl">{weather.name}</h2>
-          <p>{weather.weather[0].description}</p>
-          <p>Temperature: {weather.main.temp}°C</p>
+          <p>{weather.list[0].weather[0].description}</p>
+          <p>Temperature: {weather.list[0].main.temp}°C</p>
           <button onClick={savePreferences} className="mt-2 p-2 bg-green-500 text-white rounded">
             Save to Favorites
           </button>

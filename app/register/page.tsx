@@ -24,8 +24,8 @@ export default function Registerpage(){
             router.push("/login")
         }else{
             alert('Registration failed');
-            const data = await res.json()
-            console.log(data);   
+            // const data = await res.json()
+            // console.log(data);   
         }
     };
 
